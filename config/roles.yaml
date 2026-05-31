@@ -1,0 +1,47 @@
+roles:
+  yuya:
+    description: "GrowthForge operator / approval layer"
+    permissions:
+      - instagrow.read
+      - instagrow.draft
+      - instagrow.audit.read
+      - contributor.read
+  nara:
+    description: "GrowthForge WA operator; can inspect MCP house and draft domain additions"
+    permissions:
+      - instagrow.read
+      - instagrow.draft
+      - contributor.read
+      - wa.read
+      - wa.draft
+  instagrow-conductor:
+    description: "Maestro / InstaGrow orchestration"
+    permissions:
+      - instagrow.read
+      - instagrow.draft
+      - contributor.read
+  instagrow-research:
+    description: "Scout"
+    permissions:
+      - instagrow.read
+      - instagrow.draft
+  instagrow-content:
+    description: "Quill"
+    permissions:
+      - instagrow.read
+      - instagrow.draft
+  instagrow-creative:
+    description: "Pixel"
+    permissions:
+      - instagrow.read
+      - instagrow.draft
+  instagrow-publishing:
+    description: "Dispatch"
+    permissions:
+      - instagrow.read
+      - instagrow.draft
+  readonly:
+    description: "Safe read-only fallback"
+    permissions:
+      - instagrow.read
+      - contributor.read

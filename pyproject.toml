@@ -1,0 +1,9 @@
+[project]
+name = "growthforge-mcp"
+version = "0.1.0"
+description = "GrowthForge internal MCP server for InstaGrow and future agent domains"
+requires-python = ">=3.11"
+dependencies = ["mcp>=1.0.0", "pydantic>=2.0", "PyYAML>=6.0"]
+
+[project.scripts]
+growthforge-mcp = "growthforge_mcp.server:main"
