@@ -6,6 +6,7 @@ from mcp.server.fastmcp import FastMCP
 
 from .auth import role_summary
 from .tools import instagrow
+from .tools import wa_agent
 
 mcp = FastMCP("growthforge")
 
@@ -41,6 +42,7 @@ def contributor_guide() -> dict[str, Any]:
 
 
 instagrow.register(mcp)
+wa_agent.register(mcp)
 
 
 def main() -> None:

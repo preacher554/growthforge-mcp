@@ -6,8 +6,10 @@ roles:
       - instagrow.draft
       - instagrow.audit.read
       - contributor.read
+      - wa.read
+      - wa.draft
   nara:
-    description: "GrowthForge WA operator; can inspect MCP house and draft domain additions"
+    description: "GrowthForge WA operator; WA agent MCP tools"
     permissions:
       - instagrow.read
       - instagrow.draft
