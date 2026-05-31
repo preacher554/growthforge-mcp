@@ -18,8 +18,7 @@ def audit(event: str, payload: dict[str, Any]) -> dict[str, Any]:
     }
     path = data_dir() / "audit" / "audit.jsonl"
     with path.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "
-")
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return record
 
 

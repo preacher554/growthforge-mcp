@@ -100,8 +100,7 @@ def register(mcp: Any) -> None:
         except Exception as e:
             raise ValueError(f"metadata_json must be valid JSON: {e}")
         path = data_dir() / "drafts" / f"{ts}-{kind_safe}-{slug}.md"
-        content = "
-".join([
+        content = "\n".join([
             "---",
             f"kind: {kind_safe}",
             f"title: {json.dumps(title, ensure_ascii=False)}",
