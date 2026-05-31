@@ -303,7 +303,7 @@ def register(mcp: Any) -> None:
         require_permission("wa.draft")
         kind_safe = "".join(c for c in kind.lower() if c.isalnum() or c in "-_")[:40] or "draft"
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-        slug = "".join(c for c in title.lower().replace(" ", "-") if c.isalnum() == "-")[:60] or "untitled"
+        slug = "".join(c for c in title.lower().replace(" ", "-") if c.isalnum() or c == "-")[:60] or "untitled"
         try:
             metadata = json.loads(metadata_json) if metadata_json else {}
         except Exception as e:
