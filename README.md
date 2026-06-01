@@ -2,7 +2,7 @@
 
 Internal role-scoped MCP server for GrowthForge agents.
 
-This repo is the **house** for custom MCP tools. V1 started with InstaGrow read/draft tools so Yuya can supervise approved GrowthForge workers safely. It now also includes safe WA Agent read/draft tools for Nara and the messaging-agent product line.
+This repo is the **house** for custom MCP tools. V1 started with InstaGrow read/draft tools so Yuya can supervise approved GrowthForge workers safely. It now also includes safe Messaging/WA Agent read/draft tools for the messaging-agent product line. These tools are global and role-scoped; they are not tied to one persona.
 
 ## Runtime path
 
@@ -16,7 +16,7 @@ This repo is the **house** for custom MCP tools. V1 started with InstaGrow read/
 - Domain modules under `growthforge_mcp/tools/`.
 - Role-scoped permissions under `config/roles.yaml`.
 - Data/drafts/audit under `/root/hermes-workspace/instagrow/mcp-data` by default.
-- WA Agent drafts are stored under the MCP data dir at `wa-agent/drafts`.
+- Messaging/WA Agent drafts are stored under the MCP data dir at `wa-agent/drafts`.
 - Stdio transport first; HTTP can come later when we want one long-running local service.
 
 ## Run manually
@@ -43,11 +43,13 @@ mcp_servers:
     connect_timeout: 60
 ```
 
-For Nara / WA Agent work, set:
+For global Messaging/WA Agent work, set:
 
 ```yaml
-GROWTHFORGE_MCP_ROLE: "nara"
+GROWTHFORGE_MCP_ROLE: "messaging-agent-operator"
 ```
+
+The `nara` role is kept only as a backward-compatible alias for the current WA Agent operator profile.
 
 ## Current tools
 
@@ -75,15 +77,15 @@ mcp_growthforge_wa_agent_audit_tail
 mcp_growthforge_wa_agent_client_respawn_checklist
 ```
 
-## WA Agent scope
+## Messaging/WA Agent scope
 
-The WA Agent tools are intentionally safe read/draft helpers for Nara:
+The Messaging/WA Agent tools are intentionally safe read/draft helpers for any approved operator role:
 
-- inspect approved WA Agent architecture/runtime roots,
+- inspect approved Messaging/WA Agent architecture/runtime roots,
 - read non-private source/playbook files,
 - create draft proposals for onboarding, tenant setup, handoff rules, QA, and package scope,
-- list WA Agent drafts,
-- review WA Agent audit entries,
+- list Messaging/WA Agent drafts,
+- review Messaging/WA Agent audit entries,
 - return a client respawn checklist for Basic, Pro, or Custom tenants.
 
 V1 does not apply production changes, restart services, send WhatsApp messages, or mutate live runtime data.
