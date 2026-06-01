@@ -11,7 +11,6 @@ from ..paths import data_dir, safe_resolve_under
 
 WA_AGENT_ROOTS = [
     Path("/root/repos/messaging-agent-architect"),
-    Path("/root/repos/whatsapp-agent-architect"),
     Path("/root/repos/growthforge-wa-agent-runtime"),
     Path("/root/hermes-workspace/wa-agent"),
 ]
