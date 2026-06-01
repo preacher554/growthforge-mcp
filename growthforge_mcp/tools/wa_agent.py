@@ -17,11 +17,11 @@ WA_AGENT_ROOTS = [
 ]
 
 ROSTER = [
-    {"codename": "Nara", "worker_id": "growthforge-wa-operator", "role": "WA Agent division operator / client respawn lead"},
-    {"codename": "Runtime Architect", "worker_id": "wa-agent-architect", "role": "runtime architecture, tenant isolation, handoff correctness"},
-    {"codename": "Tenant Operator", "worker_id": "wa-agent-tenant-operator", "role": "client onboarding, package scope, tenant files"},
-    {"codename": "QA Operator", "worker_id": "wa-agent-qa", "role": "handoff, buffer, outbox, tenant isolation test plans"},
-    {"codename": "Support Operator", "worker_id": "wa-agent-support", "role": "runtime issue triage, audit review, client support notes"},
+    {"codename": "Messaging Agent Operator", "worker_id": "messaging-agent-operator", "role": "client respawn lead / managed messaging agent operator"},
+    {"codename": "Runtime Architect", "worker_id": "messaging-agent-architect", "role": "runtime architecture, tenant isolation, handoff correctness"},
+    {"codename": "Tenant Operator", "worker_id": "messaging-agent-tenant-operator", "role": "client onboarding, package scope, tenant files"},
+    {"codename": "QA Operator", "worker_id": "messaging-agent-qa", "role": "handoff, buffer, outbox, tenant isolation test plans"},
+    {"codename": "Support Operator", "worker_id": "messaging-agent-support", "role": "runtime issue triage, audit review, client support notes"},
 ]
 
 RESPAWN_CHECKLIST = {
@@ -58,13 +58,13 @@ def _refuse_private_file(path: Path) -> None:
 def register(mcp: Any) -> None:
     @mcp.tool()
     def wa_agent_roster() -> dict[str, Any]:
-        """Return the WA Agent worker roster and operating gates."""
+        """Return the Messaging Agent worker roster and operating gates."""
         require_permission("wa_agent.read")
         return {"system": "WA Agent / Messaging Agent", "roster": ROSTER, "gates": list(RESPAWN_CHECKLIST.keys())}
 
     @mcp.tool()
     def wa_agent_status() -> dict[str, Any]:
-        """Return a read-only status snapshot of known WA Agent roots and MCP data paths."""
+        """Return a read-only status snapshot of known Messaging Agent roots and MCP data paths."""
         require_permission("wa_agent.read")
         roots = [{"path": str(root), "exists": root.exists(), "is_dir": root.is_dir()} for root in WA_AGENT_ROOTS]
         dd = _wa_data_dir()
@@ -72,7 +72,7 @@ def register(mcp: Any) -> None:
 
     @mcp.tool()
     def wa_agent_list_workspaces(max_depth: int = 2) -> dict[str, Any]:
-        """List known WA Agent workspace directories."""
+        """List known Messaging Agent workspace directories."""
         require_permission("wa_agent.read")
         max_depth = max(0, min(int(max_depth), 4))
         results = []
@@ -92,7 +92,7 @@ def register(mcp: Any) -> None:
 
     @mcp.tool()
     def wa_agent_read_source_file(root_path: str, rel_path: str, max_chars: int = 12000) -> dict[str, Any]:
-        """Read a non-private source/playbook file under an approved WA Agent root."""
+        """Read a non-private source/playbook file under an approved Messaging Agent root."""
         require_permission("wa_agent.read")
         root = Path(root_path).resolve()
         allowed = [r.resolve() for r in WA_AGENT_ROOTS if r.exists()]
@@ -108,7 +108,7 @@ def register(mcp: Any) -> None:
 
     @mcp.tool()
     def wa_agent_create_draft(kind: str, title: str, body: str, metadata_json: str = "{}") -> dict[str, Any]:
-        """Create a draft proposal for a WA Agent change. Does not apply production changes."""
+        """Create a draft proposal for a Messaging Agent change. Does not apply production changes."""
         require_permission("wa_agent.draft")
         kind_safe = _safe_segment(kind, "draft")[:40]
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -125,7 +125,7 @@ def register(mcp: Any) -> None:
 
     @mcp.tool()
     def wa_agent_list_drafts(limit: int = 50) -> dict[str, Any]:
-        """List recent WA Agent draft proposals."""
+        """List recent Messaging Agent draft proposals."""
         require_permission("wa_agent.read")
         limit = max(1, min(int(limit), 200))
         drafts = sorted((_wa_data_dir() / "drafts").glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True)[:limit]
@@ -133,14 +133,14 @@ def register(mcp: Any) -> None:
 
     @mcp.tool()
     def wa_agent_audit_tail(limit: int = 20) -> dict[str, Any]:
-        """Read recent MCP audit events for WA Agent/GrowthForge."""
+        """Read recent MCP audit events for Messaging Agent/GrowthForge."""
         require_permission("wa_agent.audit.read")
         events = [event for event in tail(limit * 3) if str(event.get("action", "")).startswith("wa_agent.")]
         return {"events": events[-limit:]}
 
     @mcp.tool()
     def wa_agent_client_respawn_checklist(package: str = "basic") -> dict[str, Any]:
-        """Return the safe client respawn checklist for a new WA Agent tenant."""
+        """Return the safe client respawn checklist for a new Messaging Agent tenant."""
         require_permission("wa_agent.read")
         package_safe = package.lower().strip()
         if package_safe not in {"basic", "pro", "custom"}:
