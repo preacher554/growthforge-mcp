@@ -9,21 +9,40 @@ roles:
       - wa_agent.draft
       - wa_agent.audit.read
       - contributor.read
-  nara:
-    description: "WA Agent division operator"
+  messaging-agent-operator:
+    description: "Global Messaging/WA Agent operator"
     permissions:
       - wa_agent.read
       - wa_agent.draft
       - wa_agent.audit.read
       - contributor.read
+  nara:
+    description: "Alias role for the current WA Agent operator profile"
+    permissions:
+      - wa_agent.read
+      - wa_agent.draft
+      - wa_agent.audit.read
+      - contributor.read
+  messaging-agent-qa:
+    description: "Messaging/WA Agent QA and respawn checklist worker"
+    permissions:
+      - wa_agent.read
+      - wa_agent.draft
+      - contributor.read
+  messaging-agent-support:
+    description: "Messaging/WA Agent support and audit review worker"
+    permissions:
+      - wa_agent.read
+      - wa_agent.audit.read
+      - contributor.read
   wa-agent-qa:
-    description: "WA Agent QA and respawn checklist worker"
+    description: "Backward-compatible alias for messaging-agent-qa"
     permissions:
       - wa_agent.read
       - wa_agent.draft
       - contributor.read
   wa-agent-support:
-    description: "WA Agent support and audit review worker"
+    description: "Backward-compatible alias for messaging-agent-support"
     permissions:
       - wa_agent.read
       - wa_agent.audit.read
