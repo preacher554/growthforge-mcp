@@ -2,7 +2,7 @@
 
 Internal role-scoped MCP server for GrowthForge agents.
 
-This repo is the **house** for custom MCP tools. V1 starts with InstaGrow read/draft tools so Yuya can supervise and Nara/workers can later add their own modules safely.
+This repo is the **house** for custom MCP tools. V1 starts with InstaGrow read/draft tools so Yuya can supervise approved GrowthForge workers safely.
 
 ## Runtime path
 
@@ -40,12 +40,6 @@ mcp_servers:
       GROWTHFORGE_MCP_DATA_DIR: "/root/hermes-workspace/instagrow/mcp-data"
     timeout: 120
     connect_timeout: 60
-```
-
-For Nara profile, use the same command but role:
-
-```yaml
-GROWTHFORGE_MCP_ROLE: "nara"
 ```
 
 ## Current tools

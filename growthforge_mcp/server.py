@@ -6,7 +6,6 @@ from mcp.server.fastmcp import FastMCP
 
 from .auth import role_summary
 from .tools import instagrow
-from .tools import wa_agent
 
 mcp = FastMCP("growthforge")
 
@@ -19,7 +18,7 @@ def health() -> dict[str, Any]:
 
 @mcp.tool()
 def contributor_guide() -> dict[str, Any]:
-    """Explain how Nara or another worker should add new MCP tools safely."""
+    """Explain how a GrowthForge worker should add new MCP tools safely."""
     return {
         "repo": "/root/repos/growthforge-mcp",
         "steps": [
@@ -42,7 +41,6 @@ def contributor_guide() -> dict[str, Any]:
 
 
 instagrow.register(mcp)
-wa_agent.register(mcp)
 
 
 def main() -> None:

@@ -5,7 +5,6 @@ This repo is the shared MCP home for GrowthForge internal agents.
 ## Boundaries
 
 - Yuya owns operator/orchestration scope.
-- Nara may add WA-agent modules later, but must keep WA tools role-scoped.
 - InstaGrow modules must respect Scout/Quill/Pixel/Dispatch boundaries.
 - Never add root shell, SSH key, firewall, or destructive Docker/systemd tools without explicit Chief approval and a separate security review.
 
@@ -28,5 +27,4 @@ growthforge_mcp/auth.py          role + permission helpers
 growthforge_mcp/audit.py         JSONL audit logging
 growthforge_mcp/tools/instagrow.py
 config/roles.yaml
-docs/nara-extension-guide.md
 ```
