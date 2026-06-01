@@ -14,6 +14,11 @@ WA_AGENT_ROOTS = [
     Path("/root/repos/growthforge-wa-agent-runtime"),
     Path("/root/hermes-workspace/wa-agent"),
 ]
+TENANT_WORKSPACE_ROOT = Path("/root/hermes-workspace/wa-agent/tenants")
+RECOMMENDED_EVOLUTION_WEBHOOK_PATH = "/webhook/evolution"
+SHARED_RUNTIME_PORT_MODEL = "one runtime port can serve many tenants; add ports only for staging, enterprise isolation, heavy traffic, special auth/network needs, or SLA"
+LIVE_SUPABASE_TABLES = ["tenants", "tenant_agent_profiles", "tenant_knowledge", "conversations", "messages"]
+EVOLUTION_BRIDGE_TERMS = ["Evolution API server", "API key", "instance", "webhook", "runtime port"]
 
 ROSTER = [
     {"codename": "Messaging Agent Operator", "worker_id": "messaging-agent-operator", "role": "client respawn lead / managed messaging agent operator"},
@@ -24,14 +29,76 @@ ROSTER = [
 ]
 
 RESPAWN_CHECKLIST = {
-    "intake": ["collect business profile", "confirm package", "collect approved FAQ", "collect handoff destination"],
-    "tenant_setup": ["create tenant_id", "set WhatsApp channel_instance", "set buffer and resume policy", "verify all runtime data is tenant-scoped"],
+    "intake": ["collect business profile", "confirm package", "collect approved FAQ", "collect handoff destination", "confirm WhatsApp number/session ownership"],
+    "workspace_setup": [
+        "create /root/hermes-workspace/wa-agent/tenants/<tenant_key>/",
+        "create tenant-profile.json",
+        "create agent-profile.md",
+        "create business-profile.md",
+        "create faq.md",
+        "create package-scope.md",
+        "create handoff-rules.md",
+        "create brand-voice.md",
+        "create qa-plan.md",
+    ],
+    "tenant_setup": [
+        "create tenant_id and tenant_key",
+        "set WhatsApp channel_instance / Evolution API instance name",
+        "store instance name in tenants.whatsapp_instance",
+        "set admin_handoff_id",
+        "set ai_enabled according to go-live state",
+        "set buffer and resume policy",
+        "verify all runtime data is tenant-scoped",
+    ],
+    "live_profile_setup": [
+        "sync agent-profile.md into tenant_agent_profiles",
+        "sync FAQ/business/handoff/brand voice into tenant_knowledge",
+        "store model/provider routing as tenant configuration when needed",
+        "verify tenants, tenant_agent_profiles, tenant_knowledge, conversations, and messages are tenant-scoped",
+    ],
     "knowledge_setup": ["business-profile.md", "faq.md", "package-scope.md", "handoff-rules.md", "brand-voice.md"],
-    "adapter": ["verify WhatsApp bridge", "configure webhook", "normalize inbound payload", "preserve provider message id", "classify business outbound events"],
-    "runtime": ["webhook idempotency", "message buffer", "planning context", "outbox safe send", "pacing worker", "runtime events"],
+    "evolution_api_setup": [
+        "create or verify Evolution API instance for the client WhatsApp number/session",
+        "store instance name in tenants.whatsapp_instance",
+        "configure Evolution webhook to WA Runtime endpoint",
+        "use recommended webhook path /webhook/evolution",
+        "verify incoming payload instance_id maps to tenant_id before processing",
+        "never expose Evolution API key in frontend, public GitHub files, tenant workspace files, or client dashboard state",
+    ],
+    "adapter": [
+        "verify Evolution API server as the WhatsApp bridge",
+        "configure webhook",
+        "normalize inbound payload",
+        "preserve provider message id for idempotency",
+        "classify inbound vs business outbound events",
+        "classify fromMe business outbound as AI outbox echo or human admin takeover",
+    ],
+    "runtime": [
+        "verify shared runtime port, usually 3300 for production",
+        "remember one runtime port can serve many tenants",
+        "do not create one runtime port per normal client",
+        "webhook idempotency",
+        "message buffer",
+        "planning context",
+        "outbox safe send",
+        "retry/dead-letter for failed sends",
+        "pacing worker",
+        "runtime events",
+    ],
     "handoff": ["handoff summary", "admin notification", "owner lock", "outbox echo vs human admin classification", "1-hour human window", "contextual resume"],
     "chat_ux": ["one idea per bubble", "one question at a time", "no repeated greeting", "strip corporate AI phrases", "split long bubbles", "adaptive emoji density"],
-    "qa": ["FAQ test", "fragmented chat test", "duplicate webhook test", "handoff test", "admin takeover test", "resume test", "tenant isolation test"],
+    "qa": [
+        "FAQ test",
+        "fragmented chat test",
+        "duplicate webhook test",
+        "handoff test",
+        "manual human takeover test",
+        "admin takeover test",
+        "resume test",
+        "tenant isolation test",
+        "Evolution API instance-to-tenant mapping test",
+        "fromMe AI echo vs human admin classification test",
+    ],
     "go_live": ["activate after QA pass", "monitor first 20-50 chats", "collect FAQ gaps", "update handoff rules", "prepare weekly improvement notes"],
 }
 
@@ -67,7 +134,15 @@ def register(mcp: Any) -> None:
         require_permission("wa_agent.read")
         roots = [{"path": str(root), "exists": root.exists(), "is_dir": root.is_dir()} for root in WA_AGENT_ROOTS]
         dd = _wa_data_dir()
-        return {"roots": roots, "data_dir": str(dd), "drafts_dir": str(dd / "drafts"), "audit_log": str(data_dir() / "audit" / "audit.jsonl")}
+        return {
+            "roots": roots,
+            "data_dir": str(dd),
+            "drafts_dir": str(dd / "drafts"),
+            "audit_log": str(data_dir() / "audit" / "audit.jsonl"),
+            "tenant_workspace_root": str(TENANT_WORKSPACE_ROOT),
+            "recommended_webhook_path": RECOMMENDED_EVOLUTION_WEBHOOK_PATH,
+            "shared_runtime_port_model": SHARED_RUNTIME_PORT_MODEL,
+        }
 
     @mcp.tool()
     def wa_agent_list_workspaces(max_depth: int = 2) -> dict[str, Any]:
@@ -138,10 +213,29 @@ def register(mcp: Any) -> None:
         return {"events": events[-limit:]}
 
     @mcp.tool()
-    def wa_agent_client_respawn_checklist(package: str = "basic") -> dict[str, Any]:
+    def wa_agent_client_respawn_checklist(package: str = "basic", tenant_key: str = "<tenant_key>") -> dict[str, Any]:
         """Return the safe client respawn checklist for a new Messaging Agent tenant."""
         require_permission("wa_agent.read")
         package_safe = package.lower().strip()
         if package_safe not in {"basic", "pro", "custom"}:
             raise ValueError("package must be one of: basic, pro, custom")
-        return {"package": package_safe, "checklist": RESPAWN_CHECKLIST, "hard_rules": ["never mix tenant data", "never read private files", "never apply production changes from V1 MCP tools", "never send live WhatsApp messages from draft/read tools", "never allow AI generation while conversation owner is human"]}
+        tenant_segment = _safe_segment(tenant_key, "<tenant_key>") if tenant_key != "<tenant_key>" else "<tenant_key>"
+        return {
+            "package": package_safe,
+            "workspace_root": str(TENANT_WORKSPACE_ROOT / tenant_segment),
+            "live_tables": LIVE_SUPABASE_TABLES,
+            "bridge_terms": EVOLUTION_BRIDGE_TERMS,
+            "recommended_webhook_path": RECOMMENDED_EVOLUTION_WEBHOOK_PATH,
+            "shared_runtime_port_model": SHARED_RUNTIME_PORT_MODEL,
+            "checklist": RESPAWN_CHECKLIST,
+            "hard_rules": [
+                "never mix tenant data",
+                "never read private files",
+                "never apply production changes from V1 MCP tools",
+                "never send live WhatsApp messages from draft/read tools",
+                "never expose Evolution API keys",
+                "never store Evolution API keys in tenant workspace files",
+                "never create one runtime port per normal client",
+                "never allow AI generation while conversation owner is human",
+            ],
+        }

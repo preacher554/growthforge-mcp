@@ -86,9 +86,13 @@ The Messaging/WA Agent tools are intentionally safe read/draft helpers for any a
 - create draft proposals for onboarding, tenant setup, handoff rules, QA, and package scope,
 - list Messaging/WA Agent drafts,
 - review Messaging/WA Agent audit entries,
-- return a client respawn checklist for Basic, Pro, or Custom tenants.
+- return a client respawn checklist for Basic, Pro, or Custom tenants,
+- help operators inspect/check client agent workspaces under `/root/hermes-workspace/wa-agent/tenants/<tenant_key>/`,
+- surface tenant profile/knowledge draft concepts for Supabase tables such as `tenants`, `tenant_agent_profiles`, and `tenant_knowledge`,
+- explain Evolution API instance-to-tenant mapping via `tenants.whatsapp_instance`,
+- reinforce the shared runtime port model: one WA Runtime port can serve many tenants, while a dedicated port is reserved for staging, enterprise isolation, heavy traffic, special auth/network needs, or high-SLA deployments.
 
-V1 does not apply production changes, restart services, send WhatsApp messages, or mutate live runtime data.
+V1 does not apply production changes, restart services, send WhatsApp messages, edit live Supabase rows, expose Evolution API keys, or mutate live runtime data.
 
 ## Safety
 
