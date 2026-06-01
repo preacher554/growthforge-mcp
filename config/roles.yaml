@@ -5,6 +5,28 @@ roles:
       - instagrow.read
       - instagrow.draft
       - instagrow.audit.read
+      - wa_agent.read
+      - wa_agent.draft
+      - wa_agent.audit.read
+      - contributor.read
+  nara:
+    description: "WA Agent division operator"
+    permissions:
+      - wa_agent.read
+      - wa_agent.draft
+      - wa_agent.audit.read
+      - contributor.read
+  wa-agent-qa:
+    description: "WA Agent QA and respawn checklist worker"
+    permissions:
+      - wa_agent.read
+      - wa_agent.draft
+      - contributor.read
+  wa-agent-support:
+    description: "WA Agent support and audit review worker"
+    permissions:
+      - wa_agent.read
+      - wa_agent.audit.read
       - contributor.read
   instagrow-conductor:
     description: "Maestro / InstaGrow orchestration"
@@ -36,4 +58,5 @@ roles:
     description: "Safe read-only fallback"
     permissions:
       - instagrow.read
+      - wa_agent.read
       - contributor.read
