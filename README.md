@@ -2,7 +2,7 @@
 
 Internal role-scoped MCP server for GrowthForge agents.
 
-This repo is the **house** for custom MCP tools. V1 starts with InstaGrow read/draft tools so Yuya can supervise approved GrowthForge workers safely.
+This repo is the **house** for custom MCP tools. V1 started with InstaGrow read/draft tools so Yuya can supervise approved GrowthForge workers safely. It now also includes safe WA Agent read/draft tools for Nara and the messaging-agent product line.
 
 ## Runtime path
 
@@ -16,6 +16,7 @@ This repo is the **house** for custom MCP tools. V1 starts with InstaGrow read/d
 - Domain modules under `growthforge_mcp/tools/`.
 - Role-scoped permissions under `config/roles.yaml`.
 - Data/drafts/audit under `/root/hermes-workspace/instagrow/mcp-data` by default.
+- WA Agent drafts are stored under the MCP data dir at `wa-agent/drafts`.
 - Stdio transport first; HTTP can come later when we want one long-running local service.
 
 ## Run manually
@@ -42,12 +43,20 @@ mcp_servers:
     connect_timeout: 60
 ```
 
+For Nara / WA Agent work, set:
+
+```yaml
+GROWTHFORGE_MCP_ROLE: "nara"
+```
+
 ## Current tools
 
 Tool names after Hermes discovery will be prefixed by server name:
 
 ```text
 mcp_growthforge_health
+mcp_growthforge_contributor_guide
+
 mcp_growthforge_instagrow_roster
 mcp_growthforge_instagrow_status
 mcp_growthforge_instagrow_list_workspaces
@@ -55,12 +64,33 @@ mcp_growthforge_instagrow_read_source_file
 mcp_growthforge_instagrow_create_draft
 mcp_growthforge_instagrow_list_drafts
 mcp_growthforge_instagrow_audit_tail
-mcp_growthforge_contributor_guide
+
+mcp_growthforge_wa_agent_roster
+mcp_growthforge_wa_agent_status
+mcp_growthforge_wa_agent_list_workspaces
+mcp_growthforge_wa_agent_read_source_file
+mcp_growthforge_wa_agent_create_draft
+mcp_growthforge_wa_agent_list_drafts
+mcp_growthforge_wa_agent_audit_tail
+mcp_growthforge_wa_agent_client_respawn_checklist
 ```
+
+## WA Agent scope
+
+The WA Agent tools are intentionally safe read/draft helpers for Nara:
+
+- inspect approved WA Agent architecture/runtime roots,
+- read non-private source/playbook files,
+- create draft proposals for onboarding, tenant setup, handoff rules, QA, and package scope,
+- list WA Agent drafts,
+- review WA Agent audit entries,
+- return a client respawn checklist for Basic, Pro, or Custom tenants.
+
+V1 does not apply production changes, restart services, send WhatsApp messages, or mutate live runtime data.
 
 ## Safety
 
-V1 intentionally avoids shell execution, service restarts, secrets, SSH, firewall, Docker destructive actions, and production publishing. Add write tools later with:
+V1 intentionally avoids shell execution, service restarts, secrets, SSH, firewall, Docker destructive actions, live WhatsApp sends, live runtime mutation, and production publishing. Add write tools later with:
 
 1. role permission check,
 2. dry-run/validate mode,
